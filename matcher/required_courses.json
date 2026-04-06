@@ -257,5 +257,15 @@
     "recommended_year": 1,
     "max_recommended_year": 1,
     "note": "全学共通 教養科目 推奨"
+  },
+  {
+    "name": "言語科学分野 大学院科目",
+    "course_code_prefix": "O15",
+    "instructor": "",
+    "priority": "B",
+    "level": "大学院",
+    "recommended_year": 1,
+    "max_recommended_year": 2,
+    "note": "人文科学研究科 言語科学分野 全科目"
   }
 ]

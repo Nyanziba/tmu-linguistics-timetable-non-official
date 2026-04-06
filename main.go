@@ -12,20 +12,29 @@ import (
 	"tmu-timetable/scraper"
 )
 
+// スクレイプ対象の学部コード
+var departmentCodes = []string{
+	"A1", // 人文社会学部
+	"11", // 人文科学研究科（大学院）
+}
+
 func main() {
 	year := flag.Int("year", 2026, "対象年度")
-	departmentCode := flag.String("dept", "A1", "学部コード（A1=人文社会学部）")
 	outputPath := flag.String("output", "src/data/courses.json", "出力先JSONファイルパス")
 	flag.Parse()
 
-	fmt.Printf("シラバスサイトから %d年度 %s の科目を取得中...\n", *year, *departmentCode)
-
-	scrapedCourses, err := scraper.FetchAllCourses(*year, *departmentCode)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "スクレイプに失敗: %v\n", err)
-		os.Exit(1)
+	var allScrapedCourses []model.ScrapedCourse
+	for _, departmentCode := range departmentCodes {
+		fmt.Printf("シラバスサイトから %d年度 %s の科目を取得中...\n", *year, departmentCode)
+		courses, err := scraper.FetchAllCourses(*year, departmentCode)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "スクレイプに失敗 (%s): %v\n", departmentCode, err)
+			os.Exit(1)
+		}
+		fmt.Printf("  %s: %d科目\n", departmentCode, len(courses))
+		allScrapedCourses = append(allScrapedCourses, courses...)
 	}
-	fmt.Printf("取得完了: %d科目（前期・通年・集中）\n", len(scrapedCourses))
+	fmt.Printf("取得合計: %d科目\n", len(allScrapedCourses))
 
 	requiredCourses, err := matcher.LoadRequiredCourses()
 	if err != nil {
@@ -34,7 +43,7 @@ func main() {
 	}
 	fmt.Printf("必修科目マスター: %d件\n", len(requiredCourses))
 
-	matchedCourses := matcher.MatchCourses(scrapedCourses, requiredCourses)
+	matchedCourses := matcher.MatchCourses(allScrapedCourses, requiredCourses)
 	fmt.Printf("マッチした科目: %d件\n", len(matchedCourses))
 
 	output := model.CoursesOutput{
@@ -57,13 +66,13 @@ func main() {
 
 	fmt.Printf("出力完了: %s\n", *outputPath)
 
-	// マッチ結果を一覧表示
 	for _, course := range matchedCourses {
-		fmt.Printf("  [%s] %s %s %s%d限 %s\n",
+		fmt.Printf("  [%s][%s] %s %s %s%d限 %s\n",
 			course.Priority,
+			course.Level,
 			course.Semester,
 			course.DayOfWeek,
-			padRight(course.CourseName, 20),
+			padRight(course.CourseName, 24),
 			course.Period,
 			course.Instructor,
 		)

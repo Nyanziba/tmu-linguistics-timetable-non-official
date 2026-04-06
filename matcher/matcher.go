@@ -22,7 +22,7 @@ func LoadRequiredCourses() ([]model.RequiredCourse, error) {
 }
 
 // MatchCourses はスクレイプした科目と必修科目リストを照合し、
-// マッチした科目にはpriorityとrecommended_yearを付与して返す。
+// マッチした科目にはpriority, level, recommended_yearを付与して返す。
 func MatchCourses(scrapedCourses []model.ScrapedCourse, requiredCourses []model.RequiredCourse) []model.MatchedCourse {
 	var matchedCourses []model.MatchedCourse
 
@@ -37,6 +37,7 @@ func MatchCourses(scrapedCourses []model.ScrapedCourse, requiredCourses []model.
 			Credits:         scraped.Credits,
 			DetailURL:       scraped.DetailURL,
 			Priority:        "",
+			Level:           determineLevelFromDepartmentCode(scraped.DepartmentCode),
 			RecommendedYear: 0,
 		}
 
@@ -47,9 +48,12 @@ func MatchCourses(scrapedCourses []model.ScrapedCourse, requiredCourses []model.
 			if matched.MaxRecommendedYear == 0 {
 				matched.MaxRecommendedYear = matched.RecommendedYear
 			}
+			// Level がrequiredCourse側で明示されていればそちらを優先
+			if bestMatch.Level != "" {
+				matched.Level = bestMatch.Level
+			}
 		}
 
-		// 必修リストにマッチした科目のみ出力する
 		if matched.Priority != "" {
 			matchedCourses = append(matchedCourses, matched)
 		}
@@ -58,11 +62,22 @@ func MatchCourses(scrapedCourses []model.ScrapedCourse, requiredCourses []model.
 	return matchedCourses
 }
 
+// determineLevelFromDepartmentCode は学部コードから「学部」or「大学院」を判定する。
+func determineLevelFromDepartmentCode(departmentCode string) string {
+	// A1=人文社会学部(学部), 11=人文科学研究科(大学院)
+	switch departmentCode {
+	case "A1":
+		return "学部"
+	case "11":
+		return "大学院"
+	default:
+		return "学部"
+	}
+}
+
 // findBestMatch はスクレイプした科目に最もマッチする必修科目を探す。
-// CourseCodeが設定されている場合は授業番号で正確にマッチし、
-// そうでなければ科目名の部分一致 + 教員名の部分一致で判定する。
 func findBestMatch(scraped model.ScrapedCourse, requiredCourses []model.RequiredCourse) *model.RequiredCourse {
-	// まず授業番号での正確マッチを優先
+	// 1. 授業番号での正確マッチを最優先
 	for index := range requiredCourses {
 		required := &requiredCourses[index]
 		if required.CourseCode != "" && required.CourseCode == scraped.CourseCode {
@@ -70,14 +85,21 @@ func findBestMatch(scraped model.ScrapedCourse, requiredCourses []model.Required
 		}
 	}
 
-	// 次に科目名+教員名の部分一致でマッチ
+	// 2. コードプレフィックスでのマッチ
+	for index := range requiredCourses {
+		required := &requiredCourses[index]
+		if required.CourseCodePrefix != "" && strings.HasPrefix(scraped.CourseCode, required.CourseCodePrefix) {
+			return required
+		}
+	}
+
+	// 3. 科目名+教員名の部分一致でマッチ
 	normalizedCourseName := normalizeCourseNameForMatching(scraped.CourseName)
 	normalizedInstructor := normalizeInstructorForMatching(scraped.Instructor)
 
 	for index := range requiredCourses {
 		required := &requiredCourses[index]
-		// CourseCodeが設定されている場合は部分一致では使わない
-		if required.CourseCode != "" {
+		if required.CourseCode != "" || required.CourseCodePrefix != "" {
 			continue
 		}
 
@@ -85,7 +107,6 @@ func findBestMatch(scraped model.ScrapedCourse, requiredCourses []model.Required
 		normalizedRequiredInstructor := normalizeInstructorForMatching(required.Instructor)
 
 		nameMatches := strings.Contains(normalizedCourseName, normalizedRequiredName)
-
 		instructorMatches := normalizedRequiredInstructor == "" ||
 			strings.Contains(normalizedInstructor, normalizedRequiredInstructor)
 
@@ -97,10 +118,7 @@ func findBestMatch(scraped model.ScrapedCourse, requiredCourses []model.Required
 	return nil
 }
 
-// normalizeCourseNameForMatching は科目名を正規化してマッチングしやすくする。
-// ローマ数字を半角英字に変換し、装飾的な括弧内の数字を除去する。
 func normalizeCourseNameForMatching(name string) string {
-	// 全角→半角の基本変換
 	replacements := map[string]string{
 		"Ⅰ": "I", "Ⅱ": "II", "Ⅲ": "III", "Ⅳ": "IV", "Ⅴ": "V",
 		"ⅰ": "I", "ⅱ": "II", "ⅲ": "III", "ⅳ": "IV", "ⅴ": "V",
@@ -114,19 +132,12 @@ func normalizeCourseNameForMatching(name string) string {
 		result = strings.ReplaceAll(result, original, replacement)
 	}
 
-	// スペース正規化
 	result = strings.Join(strings.Fields(result), " ")
 	return result
 }
 
-// normalizeInstructorForMatching は教員名を正規化する。
-// 姓だけ残して比較しやすくする。
 func normalizeInstructorForMatching(instructor string) string {
-	// 全角スペースを半角に
 	instructor = strings.ReplaceAll(instructor, "\u3000", " ")
 	instructor = strings.TrimSpace(instructor)
-
-	// 「橋本（龍）」→「橋本」、「パク ウンビ」→「パク」のように姓を取得
-	// ただし完全一致ではなく部分一致で使うので、そのまま返す
 	return instructor
 }

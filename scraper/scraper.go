@@ -103,14 +103,15 @@ func parseTimetableHTML(htmlContent string, dayOfWeek string, departmentCode str
 		detailURL := extractDetailURL(cells[6].onclickContent)
 
 		course := model.ScrapedCourse{
-			CourseName: strings.TrimSpace(cells[6].textContent),
-			CourseCode: strings.TrimSpace(cells[7].textContent),
-			Instructor: normalizeWhitespace(strings.TrimSpace(cells[5].textContent)),
-			DayOfWeek:  strings.TrimSpace(cells[3].textContent),
-			Period:     period,
-			Semester:   strings.TrimSpace(cells[2].textContent),
-			Credits:    credits,
-			DetailURL:  detailURL,
+			CourseName:     strings.TrimSpace(cells[6].textContent),
+			CourseCode:     strings.TrimSpace(cells[7].textContent),
+			Instructor:     normalizeWhitespace(strings.TrimSpace(cells[5].textContent)),
+			DayOfWeek:      strings.TrimSpace(cells[3].textContent),
+			Period:         period,
+			Semester:       strings.TrimSpace(cells[2].textContent),
+			Credits:        credits,
+			DetailURL:      detailURL,
+			DepartmentCode: departmentCode,
 		}
 
 		// 「他」の曜日で曜日が空の場合は集中講義

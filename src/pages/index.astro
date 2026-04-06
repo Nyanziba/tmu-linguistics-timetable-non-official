@@ -7,92 +7,143 @@ import coursesData from '../data/courses.json';
 
 const { year, courses } = coursesData;
 
-// 前期: 前期 + 通年
-const firstSemesterCourses = courses.filter(
-  (course) => course.semester === "前期" || course.semester === "通年"
-);
-// 後期: 後期 + 通年
-const secondSemesterCourses = courses.filter(
-  (course) => course.semester === "後期" || course.semester === "通年"
-);
-// 集中講義
-const intensiveCourses = courses.filter(
-  (course) => course.period === 0 || course.day_of_week === "他"
-);
+// レベルで分離
+const undergradCourses = courses.filter((c) => c.level === "学部");
+const gradCourses = courses.filter((c) => c.level === "大学院");
 
-// 通常科目のみ（グリッド用）
-const firstSemesterRegular = firstSemesterCourses.filter(
-  (course) => course.period > 0 && course.day_of_week !== "他"
-);
-const secondSemesterRegular = secondSemesterCourses.filter(
-  (course) => course.period > 0 && course.day_of_week !== "他"
-);
+// 学部: 前期/後期
+function splitBySemester(list: typeof courses) {
+  const first = list.filter((c) => (c.semester === "前期" || c.semester === "通年") && c.period > 0 && c.day_of_week !== "他");
+  const second = list.filter((c) => (c.semester === "後期" || c.semester === "通年") && c.period > 0 && c.day_of_week !== "他");
+  const intensive = list.filter((c) => c.period === 0 || c.day_of_week === "他");
+  return { first, second, intensive };
+}
+
+const undergrad = splitBySemester(undergradCourses);
+const grad = splitBySemester(gradCourses);
 ---
 
 <Layout title={`${year}年度 言語科学教室 時間割`}>
   <p class="text-sm text-gray-500 mb-2">
-    東京都立大学 人文社会学部 人間社会学科 言語科学教室
-    ・{courses.length}科目
+    東京都立大学 言語科学教室（分野）
+    ・学部 {undergradCourses.length}科目 / 大学院 {gradCourses.length}科目
   </p>
 
-  <!-- セメスター切り替え -->
-  <div class="mb-6 flex border-b border-gray-200">
+  <!-- 学部/大学院 トグル -->
+  <div class="mb-4 flex gap-2">
     <button
-      id="tab-first-semester"
-      class="semester-tab px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600"
-      data-semester="first"
+      id="level-undergrad"
+      class="level-tab px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white"
+      data-level="undergrad"
     >
-      前期（{firstSemesterRegular.length}科目）
+      学部
     </button>
     <button
-      id="tab-second-semester"
-      class="semester-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
-      data-semester="second"
+      id="level-grad"
+      class="level-tab px-4 py-2 rounded-lg text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300"
+      data-level="grad"
     >
-      後期（{secondSemesterRegular.length}科目）
+      大学院
     </button>
   </div>
 
-  <!-- 前期 -->
-  <div id="panel-first-semester" class="semester-panel">
-    <TimetableGrid courses={firstSemesterRegular} />
+  <!-- ===== 学部 ===== -->
+  <div id="panel-undergrad" class="level-panel">
+    <div class="mb-4 flex border-b border-gray-200">
+      <button
+        class="semester-tab semester-tab-undergrad px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600"
+        data-semester="first" data-level-target="undergrad"
+      >
+        前期（{undergrad.first.length}科目）
+      </button>
+      <button
+        class="semester-tab semester-tab-undergrad px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        data-semester="second" data-level-target="undergrad"
+      >
+        後期（{undergrad.second.length}科目）
+      </button>
+    </div>
+
+    <div id="panel-undergrad-first" class="semester-panel-undergrad">
+      <TimetableGrid courses={undergrad.first} />
+    </div>
+    <div id="panel-undergrad-second" class="semester-panel-undergrad hidden">
+      <TimetableGrid courses={undergrad.second} />
+    </div>
+
+    <IntensiveCourses courses={undergrad.intensive} />
   </div>
 
-  <!-- 後期 -->
-  <div id="panel-second-semester" class="semester-panel hidden">
-    <TimetableGrid courses={secondSemesterRegular} />
-  </div>
+  <!-- ===== 大学院 ===== -->
+  <div id="panel-grad" class="level-panel hidden">
+    <div class="mb-4 flex border-b border-gray-200">
+      <button
+        class="semester-tab semester-tab-grad px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600"
+        data-semester="first" data-level-target="grad"
+      >
+        前期（{grad.first.length}科目）
+      </button>
+      <button
+        class="semester-tab semester-tab-grad px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        data-semester="second" data-level-target="grad"
+      >
+        後期（{grad.second.length}科目）
+      </button>
+    </div>
 
-  <!-- 集中講義（常時表示） -->
-  <IntensiveCourses courses={intensiveCourses} />
+    <div id="panel-grad-first" class="semester-panel-grad">
+      <TimetableGrid courses={grad.first} />
+    </div>
+    <div id="panel-grad-second" class="semester-panel-grad hidden">
+      <TimetableGrid courses={grad.second} />
+    </div>
+
+    <IntensiveCourses courses={grad.intensive} />
+  </div>
 </Layout>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const tabs = document.querySelectorAll<HTMLButtonElement>('.semester-tab');
-    const panels = document.querySelectorAll<HTMLElement>('.semester-panel');
+    // 学部/大学院 トグル
+    const levelTabs = document.querySelectorAll<HTMLButtonElement>('.level-tab');
+    const levelPanels = document.querySelectorAll<HTMLElement>('.level-panel');
 
-    tabs.forEach(tab => {
+    levelTabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const semester = tab.dataset.semester;
+        const level = tab.dataset.level;
 
-        // タブのスタイル切り替え
-        tabs.forEach(otherTab => {
-          otherTab.classList.remove('border-blue-500', 'text-blue-600');
-          otherTab.classList.add('border-transparent', 'text-gray-500');
+        levelTabs.forEach(t => {
+          t.classList.remove('bg-gray-800', 'text-white');
+          t.classList.add('bg-gray-200', 'text-gray-700');
         });
-        tab.classList.remove('border-transparent', 'text-gray-500');
-        tab.classList.add('border-blue-500', 'text-blue-600');
+        tab.classList.remove('bg-gray-200', 'text-gray-700');
+        tab.classList.add('bg-gray-800', 'text-white');
 
-        // パネルの表示切り替え
-        panels.forEach(panel => {
-          panel.classList.add('hidden');
-        });
-        const targetPanel = document.getElementById(`panel-${semester}-semester`);
-        if (targetPanel) {
-          targetPanel.classList.remove('hidden');
-        }
+        levelPanels.forEach(p => p.classList.add('hidden'));
+        document.getElementById(`panel-${level}`)?.classList.remove('hidden');
       });
     });
+
+    // 前期/後期 タブ（学部・大学院それぞれ独立）
+    for (const levelTarget of ['undergrad', 'grad']) {
+      const semesterTabs = document.querySelectorAll<HTMLButtonElement>(`.semester-tab-${levelTarget}`);
+      const semesterPanels = document.querySelectorAll<HTMLElement>(`.semester-panel-${levelTarget}`);
+
+      semesterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const semester = tab.dataset.semester;
+
+          semesterTabs.forEach(t => {
+            t.classList.remove('border-blue-500', 'text-blue-600');
+            t.classList.add('border-transparent', 'text-gray-500');
+          });
+          tab.classList.remove('border-transparent', 'text-gray-500');
+          tab.classList.add('border-blue-500', 'text-blue-600');
+
+          semesterPanels.forEach(p => p.classList.add('hidden'));
+          document.getElementById(`panel-${levelTarget}-${semester}`)?.classList.remove('hidden');
+        });
+      });
+    }
   });
 </script>
