@@ -57,11 +57,39 @@
   },
   {
     "name": "脳計測科学",
+    "course_code": "F1517",
+    "instructor": "渕野",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": "III 前期木3 3年前期"
+  },
+  {
+    "name": "脳計測科学",
+    "course_code": "F1518",
+    "instructor": "渕野",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": "IV 前期木4 3年前期 3限と合わせて履修"
+  },
+  {
+    "name": "脳計測科学",
+    "course_code": "F1519",
     "instructor": "渕野",
     "priority": "B",
     "recommended_year": 2,
-    "max_recommended_year": 3,
-    "note": "I・II"
+    "max_recommended_year": 2,
+    "note": "I 後期木3 2年後期"
+  },
+  {
+    "name": "脳計測科学",
+    "course_code": "F1520",
+    "instructor": "渕野",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "II 後期木4 2年後期 3限と合わせて履修"
   },
   {
     "name": "形態論",
@@ -105,7 +133,7 @@
   },
   {
     "name": "発達科学",
-    "instructor": "パク",
+    "instructor": "朴",
     "priority": "B",
     "recommended_year": 3,
     "max_recommended_year": 3,
