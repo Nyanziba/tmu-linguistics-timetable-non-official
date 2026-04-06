@@ -1,0 +1,401 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import creditRequirements from '../../data/credit_requirements.json';
+
+// credit_requirements.json から全course_codeを抽出してJSに渡す
+type Course = { name: string; course_code?: string; credits: number };
+type Subcategory = { id: string; courses: Course[] };
+type Category = { id: string; subcategories: Subcategory[] };
+
+const allCourseCodes: Record<string, { name: string; categoryId: string; subcategoryId: string; credits: number }> = {};
+
+for (const category of creditRequirements.categories as Category[]) {
+  for (const subcategory of category.subcategories) {
+    for (const course of subcategory.courses) {
+      if (course.course_code) {
+        allCourseCodes[course.course_code] = {
+          name: course.name,
+          categoryId: category.id,
+          subcategoryId: subcategory.id,
+          credits: course.credits,
+        };
+      }
+    }
+  }
+}
+---
+
+<Layout title="成績インポート">
+  <p class="text-sm text-gray-500 mb-2">
+    キャンパスウェブの「成績通知書照会」ページからデータを取り込みます。
+  </p>
+
+  <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-1">
+    <p class="font-semibold">注意事項</p>
+    <ul class="list-disc ml-4 space-y-0.5">
+      <li>成績データはサーバーに送信されません。すべてブラウザ内で処理されます。</li>
+      <li>インポートを実行すると、以前の手動入力値はリセットされます。</li>
+      <li>登録されていない科目は自動的にカテゴリ分類され、手動単位数として加算されます。</li>
+    </ul>
+  </div>
+
+  <!-- ステップ1: 貼り付け -->
+  <div id="step-paste" class="mb-6">
+    <h2 class="text-lg font-bold text-gray-800 mb-2">1. 成績データを貼り付け</h2>
+    <p class="text-xs text-gray-400 mb-2">
+      キャンパスウェブの成績通知書照会ページで Ctrl+A（全選択）→ Ctrl+C（コピー）して、下のテキストエリアに貼り付けてください。
+    </p>
+    <textarea
+      id="paste-area"
+      class="w-full h-48 p-3 border border-gray-300 rounded-lg text-sm font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      placeholder="ここに成績データを貼り付け..."
+    ></textarea>
+    <button
+      id="parse-button"
+      class="mt-2 px-6 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+    >
+      解析する
+    </button>
+  </div>
+
+  <!-- ステップ2: プレビュー -->
+  <div id="step-preview" class="hidden mb-6">
+    <h2 class="text-lg font-bold text-gray-800 mb-2">2. 解析結果の確認</h2>
+
+    <!-- マッチした科目 -->
+    <div id="matched-section" class="mb-4">
+      <h3 class="text-sm font-semibold text-green-700 mb-2">
+        履修チェッカーに反映される科目（<span id="matched-count">0</span>科目）
+      </h3>
+      <div id="matched-list" class="space-y-1"></div>
+    </div>
+
+    <!-- マッチしなかった科目（カテゴリ別） -->
+    <div id="unmatched-section" class="mb-4">
+      <h3 class="text-sm font-semibold text-amber-700 mb-2">
+        手動単位数に加算される科目（<span id="unmatched-count">0</span>科目）
+      </h3>
+      <div id="unmatched-list" class="space-y-1"></div>
+    </div>
+
+    <!-- サマリー -->
+    <div id="summary" class="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+      <p class="text-sm text-gray-700" id="summary-text"></p>
+    </div>
+
+    <div class="flex gap-3">
+      <button
+        id="apply-button"
+        class="px-6 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+      >
+        反映する
+      </button>
+      <button
+        id="back-button"
+        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
+      >
+        やり直す
+      </button>
+    </div>
+  </div>
+
+  <!-- ステップ3: 完了 -->
+  <div id="step-done" class="hidden mb-6">
+    <div class="p-6 bg-green-50 rounded-lg border border-green-200 text-center">
+      <p class="text-green-800 font-bold text-lg mb-2">反映完了</p>
+      <p class="text-sm text-green-600 mb-4">履修チェッカーに成績データが反映されました。</p>
+      <a
+        href="../credits"
+        class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+      >
+        履修チェッカーを確認する
+      </a>
+    </div>
+  </div>
+
+  <!-- ブックマークレット -->
+  <details class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+    <summary class="text-sm font-medium text-gray-700 cursor-pointer">ブックマークレットの使い方</summary>
+    <div class="mt-3 text-xs text-gray-500 space-y-2">
+      <p>以下のリンクをブックマークバーにドラッグ&ドロップしてください：</p>
+      <p>
+        <a
+          id="bookmarklet-link"
+          class="inline-block px-3 py-1 bg-gray-800 text-white rounded text-xs no-underline hover:bg-gray-700"
+          href="javascript:void(0)"
+        >
+          成績コピー
+        </a>
+      </p>
+      <ol class="list-decimal ml-4 space-y-1">
+        <li>キャンパスウェブにログインし、「成績通知書照会」を開く</li>
+        <li>ブックマークバーの「成績コピー」をクリック</li>
+        <li>クリップボードに成績データがコピーされます</li>
+        <li>このページに戻って Ctrl+V で貼り付け</li>
+      </ol>
+    </div>
+  </details>
+</Layout>
+
+<script is:inline define:vars={{ allCourseCodes }}>
+  window.__COURSE_CODES__ = allCourseCodes;
+
+  // ブックマークレット
+  const bookmarkletCode = "javascript:void(function(){var t=document.querySelector('table');if(!t){alert('成績テーブルが見つかりません');return;}var rows=t.querySelectorAll('tr');var text='';rows.forEach(function(r){var cells=r.querySelectorAll('td,th');var row=[];cells.forEach(function(c){row.push(c.innerText.trim());});text+='\\n'+row.join('\\t');});navigator.clipboard.writeText(text.trim()).then(function(){alert('成績データをコピーしました。');}).catch(function(){prompt('コピーに失敗。手動でコピー:',text);});}())";
+  document.addEventListener("DOMContentLoaded", function() {
+    var link = document.getElementById("bookmarklet-link");
+    if (link) link.href = bookmarkletCode;
+  });
+</script>
+
+<script>
+  type ParsedCourse = {
+    rowNumber: string;
+    majorCategory: string;
+    middleCategory: string;
+    minorCategory: string;
+    courseCode: string;
+    courseName: string;
+    instructor: string;
+    credits: number;
+    year: string;
+    semester: string;
+    grade: string;
+    pass: string;
+  };
+
+  type MatchedCourse = ParsedCourse & {
+    registeredName: string;
+    categoryId: string;
+    subcategoryId: string;
+  };
+
+  type UnmatchedCourse = ParsedCourse & {
+    assignedCategory: string;
+    assignedSubcategory: string;
+  };
+
+  const COMPLETED_STORAGE_KEY = "tmu-credits-completed";
+  const MANUAL_STORAGE_KEY = "tmu-credits-manual";
+  const CATEGORY_MAP: Record<string, { name: string; categoryId: string; subcategoryId: string; credits: number }> =
+    (window as any).__COURSE_CODES__ || {};
+
+  let currentMatched: MatchedCourse[] = [];
+  let currentUnmatched: UnmatchedCourse[] = [];
+
+  function parseCampusWebText(text: string): ParsedCourse[] {
+    const lines = text.split("\n");
+    const courses: ParsedCourse[] = [];
+
+    for (const line of lines) {
+      const columns = line.split("\t");
+      if (columns.length < 12) continue;
+
+      const rowNumber = columns[0].trim();
+      const pass = columns[11].trim();
+
+      if (!/^\d+$/.test(rowNumber)) continue;
+      if (pass !== "合") continue;
+
+      courses.push({
+        rowNumber,
+        majorCategory: columns[1].trim(),
+        middleCategory: columns[2].trim(),
+        minorCategory: columns[3].trim(),
+        courseCode: columns[4].trim(),
+        courseName: columns[5].trim(),
+        instructor: columns[6].trim(),
+        credits: parseFloat(columns[7].trim()) || 0,
+        year: columns[8].trim(),
+        semester: columns[9].trim(),
+        grade: columns[10].trim(),
+        pass,
+      });
+    }
+
+    return courses;
+  }
+
+  function classifyUnmatchedCourse(course: ParsedCourse): { category: string; subcategory: string } {
+    const major = course.majorCategory;
+    const middle = course.middleCategory;
+
+    if (major === "基礎科目") {
+      if (middle === "未修言語") return { category: "general", subcategory: "language_second" };
+      if (middle.includes("英語") || middle === "選択英語") return { category: "general", subcategory: "language_first" };
+      // 基礎ゼミナール・情報科目・理系基礎等はliberal_artsへ（手動入力欄がある）
+      return { category: "general", subcategory: "liberal_arts" };
+    }
+
+    if (major === "教養科目" || major === "基盤科目") {
+      return { category: "general", subcategory: "liberal_arts" };
+    }
+
+    if (major === "専門教育科目") {
+      if (middle.includes("言語科学")) {
+        return { category: "linguistics", subcategory: "elective_required" };
+      }
+      return { category: "other_major", subcategory: "other_departments" };
+    }
+
+    return { category: "free_elective", subcategory: "free_elective_courses" };
+  }
+
+  function matchCourses(parsed: ParsedCourse[]) {
+    const matched: MatchedCourse[] = [];
+    const unmatched: UnmatchedCourse[] = [];
+
+    for (const course of parsed) {
+      const registered = CATEGORY_MAP[course.courseCode];
+      if (registered) {
+        matched.push({
+          ...course,
+          registeredName: registered.name,
+          categoryId: registered.categoryId,
+          subcategoryId: registered.subcategoryId,
+        });
+      } else {
+        const classification = classifyUnmatchedCourse(course);
+        unmatched.push({
+          ...course,
+          assignedCategory: classification.category,
+          assignedSubcategory: classification.subcategory,
+        });
+      }
+    }
+
+    return { matched, unmatched };
+  }
+
+  function renderPreview(matched: MatchedCourse[], unmatched: UnmatchedCourse[]): void {
+    const matchedList = document.getElementById("matched-list")!;
+    const unmatchedList = document.getElementById("unmatched-list")!;
+    const matchedCount = document.getElementById("matched-count")!;
+    const unmatchedCount = document.getElementById("unmatched-count")!;
+    const summaryText = document.getElementById("summary-text")!;
+
+    matchedCount.textContent = String(matched.length);
+    unmatchedCount.textContent = String(unmatched.length);
+
+    matchedList.innerHTML = matched
+      .map(
+        (course) => `
+        <div class="flex items-center gap-2 p-2 bg-white rounded border border-green-100">
+          <span class="text-green-600 text-sm">✓</span>
+          <span class="text-sm font-medium">${course.courseName}</span>
+          <span class="text-xs text-gray-400">${course.courseCode}</span>
+          <span class="text-xs text-gray-400">${course.credits}単位</span>
+          <span class="text-xs text-gray-400">${course.year}${course.semester}</span>
+          <span class="text-xs text-gray-400">${course.grade}</span>
+        </div>
+      `
+      )
+      .join("");
+
+    const categoryLabels: Record<string, string> = {
+      general: "基礎・教養・基盤科目",
+      other_major: "専門教育科目（その他）",
+      linguistics: "専門教育科目（言語科学教室）",
+      free_elective: "自由選択科目",
+    };
+
+    const grouped: Record<string, UnmatchedCourse[]> = {};
+    for (const course of unmatched) {
+      const key = course.assignedCategory;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(course);
+    }
+
+    unmatchedList.innerHTML = Object.entries(grouped)
+      .map(
+        ([categoryId, courses]) => `
+        <div class="mb-3">
+          <p class="text-xs font-semibold text-gray-600 mb-1">→ ${categoryLabels[categoryId] || categoryId}（+${courses.reduce((s: number, c: UnmatchedCourse) => s + c.credits, 0)}単位）</p>
+          ${courses
+            .map(
+              (course) => `
+            <div class="flex items-center gap-2 p-2 bg-white rounded border border-amber-100 ml-4">
+              <span class="text-amber-500 text-sm">+</span>
+              <span class="text-sm">${course.courseName}</span>
+              <span class="text-xs text-gray-400">${course.courseCode}</span>
+              <span class="text-xs text-gray-400">${course.credits}単位</span>
+              <span class="text-xs text-gray-400">${course.year}${course.semester}</span>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      `
+      )
+      .join("");
+
+    const totalCredits = [...matched, ...unmatched].reduce((s, c) => s + c.credits, 0);
+    summaryText.textContent = `合計: ${matched.length + unmatched.length}科目 / ${totalCredits}単位（チェック反映: ${matched.length}科目、手動加算: ${unmatched.length}科目）`;
+  }
+
+  function applyToLocalStorage(matched: MatchedCourse[], unmatched: UnmatchedCourse[]): void {
+    let completed: Set<string>;
+    try {
+      const stored = localStorage.getItem(COMPLETED_STORAGE_KEY);
+      completed = stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      completed = new Set();
+    }
+
+    for (const course of matched) {
+      completed.add(course.courseCode);
+    }
+    localStorage.setItem(COMPLETED_STORAGE_KEY, JSON.stringify([...completed]));
+
+    // 手動単位はインポートデータで上書き（既存値をリセット）
+    const manual: Record<string, number> = {};
+
+    for (const course of unmatched) {
+      const subId = course.assignedSubcategory;
+      manual[subId] = (manual[subId] || 0) + course.credits;
+    }
+    localStorage.setItem(MANUAL_STORAGE_KEY, JSON.stringify(manual));
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const pasteArea = document.getElementById("paste-area") as HTMLTextAreaElement;
+    const parseButton = document.getElementById("parse-button")!;
+    const applyButton = document.getElementById("apply-button")!;
+    const backButton = document.getElementById("back-button")!;
+    const stepPaste = document.getElementById("step-paste")!;
+    const stepPreview = document.getElementById("step-preview")!;
+    const stepDone = document.getElementById("step-done")!;
+
+    parseButton.addEventListener("click", () => {
+      const text = pasteArea.value.trim();
+      if (!text) return;
+
+      const parsed = parseCampusWebText(text);
+      if (parsed.length === 0) {
+        alert("成績データが見つかりませんでした。キャンパスウェブの成績通知書照会ページの内容を貼り付けてください。");
+        return;
+      }
+
+      const { matched, unmatched } = matchCourses(parsed);
+      currentMatched = matched;
+      currentUnmatched = unmatched;
+
+      renderPreview(matched, unmatched);
+
+      stepPaste.classList.add("hidden");
+      stepPreview.classList.remove("hidden");
+    });
+
+    backButton.addEventListener("click", () => {
+      stepPreview.classList.add("hidden");
+      stepPaste.classList.remove("hidden");
+    });
+
+    applyButton.addEventListener("click", () => {
+      applyToLocalStorage(currentMatched, currentUnmatched);
+
+      stepPreview.classList.add("hidden");
+      stepDone.classList.remove("hidden");
+    });
+  });
+</script>

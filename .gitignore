@@ -3,3 +3,5 @@ dist/
 cache/
 .astro/
 ガイダンス言語科学2026_v0.pdf
+*.png
+.playwright-mcp/

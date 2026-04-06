@@ -1,0 +1,387 @@
+---
+import Layout from '../layouts/Layout.astro';
+import creditRequirements from '../data/credit_requirements.json';
+
+const { total_required_credits, categories } = creditRequirements;
+
+type Course = {
+  name: string;
+  instructor: string;
+  credits: number;
+  recommended_year: number;
+  note: string;
+  course_code?: string;
+};
+
+type Subcategory = {
+  id: string;
+  name: string;
+  priority: string;
+  required_credits?: number;
+  note?: string;
+  courses: Course[];
+};
+
+type Category = {
+  id: string;
+  name: string;
+  required_credits: number;
+  description: string;
+  subcategories: Subcategory[];
+};
+
+function courseKey(course: Course): string {
+  if (course.course_code) return course.course_code;
+  return `${course.name}_${course.instructor}`;
+}
+
+const categoryColors: Record<string, { heading: string; bg: string; border: string; bar: string }> = {
+  linguistics: { heading: "text-red-700", bg: "bg-red-50", border: "border-red-200", bar: "bg-red-500" },
+  other_major: { heading: "text-purple-700", bg: "bg-purple-50", border: "border-purple-200", bar: "bg-purple-500" },
+  general: { heading: "text-green-700", bg: "bg-green-50", border: "border-green-200", bar: "bg-green-500" },
+  free_elective: { heading: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", bar: "bg-amber-500" },
+};
+
+const subcategoryColors: Record<string, { text: string; bg: string; border: string }> = {
+  A: { text: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
+  B: { text: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+};
+---
+
+<Layout title="言語科学教室 履修チェッカー">
+  <p class="text-sm text-gray-500 mb-2">
+    チェックを入れると履修済みとして記録されます（ブラウザに保存）
+  </p>
+  <p class="text-xs text-gray-400 mb-4">
+    卒業要件: {total_required_credits}単位以上（専門74単位 + 基礎教養38単位 + 自由選択18単位）
+  </p>
+
+  <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-1">
+    <p class="font-semibold">注意事項</p>
+    <ul class="list-disc ml-4 space-y-0.5">
+      <li>本ツールは非公式です。正式な単位数は必ずキャンパスウェブで確認してください。</li>
+      <li>データはブラウザのローカルストレージに保存されます。ブラウザのデータを消去すると記録も失われます。</li>
+      <li>卒業要件の詳細は学則・履修ガイドを参照してください。ここに表示される数値は参考値です。</li>
+      <li>重複履修可能科目（※印）の扱いなど、個別の履修ルールには対応していない場合があります。</li>
+    </ul>
+  </div>
+
+  <!-- インポート導線 -->
+  <div class="mb-4">
+    <a
+      href="credits/import"
+      class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+    >
+      キャンパスウェブから成績を取り込む
+    </a>
+  </div>
+
+  <!-- 全体サマリー -->
+  <div id="overall-summary" class="mb-6 p-4 bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm font-semibold text-gray-700">全体の進捗</span>
+      <span id="overall-label" class="text-sm text-gray-500">0 / {total_required_credits} 単位</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-3">
+      <div id="overall-bar" class="bg-gray-800 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- カテゴリごと -->
+  {(categories as Category[]).map((category) => {
+    const colors = categoryColors[category.id] || categoryColors.general;
+    return (
+      <section class="mb-8" data-category={category.id}>
+        <!-- カテゴリヘッダー -->
+        <div class={`flex items-center justify-between mb-1 p-3 rounded-lg ${colors.bg} border ${colors.border}`}>
+          <div>
+            <h2 class={`text-lg font-bold ${colors.heading}`}>{category.name}</h2>
+            <p class="text-xs text-gray-500 mt-0.5">{category.description}</p>
+          </div>
+          <span class={`text-sm font-medium ${colors.heading} whitespace-nowrap ml-4`} data-category-progress={category.id}>
+            0 / {category.required_credits} 単位
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+          <div
+            class={`h-2 rounded-full transition-all duration-300 ${colors.bar}`}
+            data-category-bar={category.id}
+            style="width: 0%"
+          />
+        </div>
+
+        <!-- サブカテゴリごと -->
+        {category.subcategories.map((subcategory) => {
+          const subColors = subcategoryColors[subcategory.priority] || subcategoryColors.B;
+          const subTotalCredits = subcategory.courses.reduce((s, c) => s + c.credits, 0);
+          const hasCourses = subcategory.courses.length > 0;
+          const hasCustomCredits = subcategory.required_credits !== undefined;
+
+          return (
+            <div class="mb-4 ml-2" data-subcategory={subcategory.id}>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class={`text-sm font-semibold ${subColors.text}`}>
+                  {subcategory.priority === "A" ? "■" : "□"} {subcategory.name}
+                  {hasCourses && <span class="text-gray-400 font-normal">（{subcategory.courses.length}科目）</span>}
+                </h3>
+                <span class="text-xs text-gray-500" data-sub-progress={subcategory.id}>
+                  0 / {hasCustomCredits ? subcategory.required_credits : subTotalCredits} 単位
+                </span>
+              </div>
+
+              {subcategory.note && (
+                <p class="text-xs text-gray-400 mb-2 ml-4">{subcategory.note}</p>
+              )}
+
+              {hasCourses && (
+                <div class="space-y-1 ml-4">
+                  {subcategory.courses.map((course) => {
+                    const key = courseKey(course);
+                    return (
+                      <label
+                        class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-300 cursor-pointer transition-colors group"
+                      >
+                        <input
+                          type="checkbox"
+                          class="course-checkbox w-5 h-5 rounded border-gray-300 text-gray-800 focus:ring-gray-500 shrink-0"
+                          data-key={key}
+                          data-category={category.id}
+                          data-subcategory={subcategory.id}
+                          data-credits={course.credits}
+                        />
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-medium text-gray-900 group-has-[:checked]:line-through group-has-[:checked]:text-gray-400">
+                              {course.name}
+                            </span>
+                            {course.note && (
+                              <span class="text-xs text-gray-400">{course.note}</span>
+                            )}
+                          </div>
+                          <div class="text-xs text-gray-500 mt-0.5">
+                            {course.instructor && <span>{course.instructor}先生</span>}
+                            {course.instructor && " · "}
+                            <span>{course.recommended_year}年次推奨</span>
+                            {" · "}<span>{course.credits}単位</span>
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+
+              {hasCustomCredits && (
+                <div class="ml-4 mt-2 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                  {!hasCourses && (
+                    <p class="text-xs text-gray-400 mb-2">
+                      個別科目の登録はありません。取得単位数を下のフィールドで入力してください。
+                    </p>
+                  )}
+                  {hasCourses && (
+                    <p class="text-xs text-gray-400 mb-2">
+                      上記以外の科目の取得単位数を入力してください。
+                    </p>
+                  )}
+                  <div class="flex items-center gap-2">
+                    <label class="text-xs text-gray-500">追加取得単位数:</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={subcategory.required_credits}
+                      value="0"
+                      class="manual-credits w-16 px-2 py-1 text-sm border border-gray-300 rounded"
+                      data-category={category.id}
+                      data-subcategory={subcategory.id}
+                    />
+                    <span class="text-xs text-gray-400">単位</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </section>
+    );
+  })}
+</Layout>
+
+<script>
+  const STORAGE_KEY = "tmu-credits-completed";
+  const MANUAL_STORAGE_KEY = "tmu-credits-manual";
+  const TOTAL_REQUIRED = 130;
+
+  function loadCompleted(): Set<string> {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveCompleted(completed: Set<string>): void {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
+  }
+
+  function loadManualCredits(): Record<string, number> {
+    try {
+      const stored = localStorage.getItem(MANUAL_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function saveManualCredits(manual: Record<string, number>): void {
+    localStorage.setItem(MANUAL_STORAGE_KEY, JSON.stringify(manual));
+  }
+
+  function getCredits(checkbox: HTMLInputElement): number {
+    return Number(checkbox.dataset.credits) || 2;
+  }
+
+  function updateProgress(): void {
+    let grandTotal = 0;
+
+    const categoryIds = ["linguistics", "other_major", "general", "free_elective"];
+
+    for (const categoryId of categoryIds) {
+      const checkboxes = document.querySelectorAll<HTMLInputElement>(
+        `input.course-checkbox[data-category="${categoryId}"]`
+      );
+      let categoryCompleted = 0;
+
+      checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+          categoryCompleted += getCredits(checkbox);
+        }
+      });
+
+      // 手動入力分を加算
+      const manualInputs = document.querySelectorAll<HTMLInputElement>(
+        `input.manual-credits[data-category="${categoryId}"]`
+      );
+      manualInputs.forEach((input) => {
+        categoryCompleted += Number(input.value) || 0;
+      });
+
+      grandTotal += categoryCompleted;
+
+      // カテゴリ進捗表示
+      const categoryProgressLabel = document.querySelector(`[data-category-progress="${categoryId}"]`);
+      if (categoryProgressLabel) {
+        const requiredText = categoryProgressLabel.textContent?.split("/")[1]?.trim() || "";
+        const requiredCredits = parseInt(requiredText) || 0;
+        categoryProgressLabel.textContent = `${categoryCompleted} / ${requiredCredits} 単位`;
+      }
+
+      const categoryBar = document.querySelector<HTMLElement>(`[data-category-bar="${categoryId}"]`);
+      if (categoryBar) {
+        const requiredAttr = categoryBar.parentElement?.previousElementSibling?.querySelector(`[data-category-progress]`);
+        const requiredText = requiredAttr?.textContent?.split("/")[1]?.trim() || "0";
+        const requiredCredits = parseInt(requiredText) || 1;
+        const percentage = Math.min((categoryCompleted / requiredCredits) * 100, 100);
+        categoryBar.style.width = `${percentage}%`;
+      }
+    }
+
+    // サブカテゴリ進捗
+    const allSubcategories = document.querySelectorAll<HTMLElement>("[data-subcategory]");
+    const processedSubs = new Set<string>();
+
+    allSubcategories.forEach((element) => {
+      const subId = element.dataset.subcategory;
+      if (!subId || processedSubs.has(subId)) return;
+      processedSubs.add(subId);
+
+      const checkboxes = element.querySelectorAll<HTMLInputElement>("input.course-checkbox");
+      let subCompleted = 0;
+
+      checkboxes.forEach((checkbox) => {
+        if (checkbox.checked) {
+          subCompleted += getCredits(checkbox);
+        }
+      });
+
+      const manualInput = element.querySelector<HTMLInputElement>("input.manual-credits");
+      if (manualInput) {
+        subCompleted += Number(manualInput.value) || 0;
+      }
+
+      const subProgress = element.querySelector(`[data-sub-progress="${subId}"]`);
+      if (subProgress) {
+        const requiredText = subProgress.textContent?.split("/")[1]?.trim() || "";
+        const requiredCredits = parseInt(requiredText) || 0;
+        subProgress.textContent = `${subCompleted} / ${requiredCredits} 単位`;
+      }
+    });
+
+    // 全体進捗
+    const overallLabel = document.getElementById("overall-label");
+    if (overallLabel) {
+      overallLabel.textContent = `${grandTotal} / ${TOTAL_REQUIRED} 単位`;
+    }
+
+    const overallBar = document.getElementById("overall-bar");
+    if (overallBar) {
+      const percentage = Math.min((grandTotal / TOTAL_REQUIRED) * 100, 100);
+      overallBar.style.width = `${percentage}%`;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const completed = loadCompleted();
+    const manualCredits = loadManualCredits();
+
+    // チェックボックス復元
+    const checkboxes = document.querySelectorAll<HTMLInputElement>("input.course-checkbox");
+    checkboxes.forEach((checkbox) => {
+      const key = checkbox.dataset.key;
+      if (key && completed.has(key)) {
+        checkbox.checked = true;
+      }
+    });
+
+    // 手動入力復元
+    const manualInputs = document.querySelectorAll<HTMLInputElement>("input.manual-credits");
+    manualInputs.forEach((input) => {
+      const subId = input.dataset.subcategory;
+      if (subId && manualCredits[subId] !== undefined) {
+        input.value = String(manualCredits[subId]);
+      }
+    });
+
+    updateProgress();
+
+    // チェックボックス変更
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const key = checkbox.dataset.key;
+        if (!key) return;
+
+        const currentCompleted = loadCompleted();
+        if (checkbox.checked) {
+          currentCompleted.add(key);
+        } else {
+          currentCompleted.delete(key);
+        }
+        saveCompleted(currentCompleted);
+        updateProgress();
+      });
+    });
+
+    // 手動入力変更
+    manualInputs.forEach((input) => {
+      input.addEventListener("input", () => {
+        const subId = input.dataset.subcategory;
+        if (!subId) return;
+
+        const current = loadManualCredits();
+        current[subId] = Number(input.value) || 0;
+        saveManualCredits(current);
+        updateProgress();
+      });
+    });
+  });
+</script>

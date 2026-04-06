@@ -1,0 +1,446 @@
+{
+  "total_required_credits": 130,
+  "categories": [
+    {
+      "id": "linguistics",
+      "name": "専門教育科目（言語科学教室）",
+      "required_credits": 54,
+      "description": "言語科学教室の科目から54単位以上",
+      "subcategories": [
+        {
+          "id": "required",
+          "name": "必修",
+          "priority": "A",
+          "courses": [
+            {
+              "name": "音韻論基礎＜101＞",
+              "course_code": "F1501",
+              "instructor": "本間",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "前期"
+            },
+            {
+              "name": "音韻論基礎＜102＞",
+              "course_code": "F1502",
+              "instructor": "本間",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "後期"
+            },
+            {
+              "name": "統語論基礎",
+              "course_code": "F1503",
+              "instructor": "原田",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "後期"
+            },
+            {
+              "name": "言語脳科学",
+              "course_code": "F1504",
+              "instructor": "橋本",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "前期"
+            },
+            {
+              "name": "言語脳科学",
+              "course_code": "F1505",
+              "instructor": "橋本",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "後期"
+            },
+            {
+              "name": "認知神経科学",
+              "course_code": "F1506",
+              "instructor": "本多",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "前期"
+            },
+            {
+              "name": "認知神経科学",
+              "course_code": "F1507",
+              "instructor": "本多",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "後期"
+            },
+            {
+              "name": "心理言語学",
+              "course_code": "F1510",
+              "instructor": "矢野",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "後期"
+            },
+            {
+              "name": "言語科学卒業論文",
+              "instructor": "",
+              "credits": 10,
+              "recommended_year": 4,
+              "note": "全教員"
+            }
+          ]
+        },
+        {
+          "id": "elective_required",
+          "name": "選択必修",
+          "priority": "B",
+          "courses": [
+            {
+              "name": "言語科学概論＜901＞",
+              "course_code": "F1508",
+              "instructor": "江頭",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "前期"
+            },
+            {
+              "name": "言語科学概論＜902＞",
+              "course_code": "F1509",
+              "instructor": "江頭",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "後期"
+            },
+            {
+              "name": "言語情報処理の統計学",
+              "course_code": "F1529",
+              "instructor": "矢野",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": ""
+            },
+            {
+              "name": "音韻論I",
+              "instructor": "本間",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": ""
+            },
+            {
+              "name": "音韻論II",
+              "instructor": "本間",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": ""
+            },
+            {
+              "name": "統語論",
+              "instructor": "原田",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": ""
+            },
+            {
+              "name": "生成言語理論101",
+              "instructor": "原田",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": ""
+            },
+            {
+              "name": "生成言語理論102",
+              "instructor": "原田",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": ""
+            },
+            {
+              "name": "脳計測科学",
+              "course_code": "F1519",
+              "instructor": "渕野",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "I 後期木3 2年後期"
+            },
+            {
+              "name": "脳計測科学",
+              "course_code": "F1520",
+              "instructor": "渕野",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "II 後期木4 2年後期 3限と合わせて履修"
+            },
+            {
+              "name": "脳計測科学",
+              "course_code": "F1517",
+              "instructor": "渕野",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "III 前期木3 3年前期"
+            },
+            {
+              "name": "脳計測科学",
+              "course_code": "F1518",
+              "instructor": "渕野",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "IV 前期木4 3年前期 3限と合わせて履修"
+            },
+            {
+              "name": "発達科学",
+              "course_code": "F1521",
+              "instructor": "朴",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "前期"
+            },
+            {
+              "name": "発達科学",
+              "course_code": "F1522",
+              "instructor": "朴",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "後期"
+            },
+            {
+              "name": "精神神経科学",
+              "course_code": "F1523",
+              "instructor": "橋本",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "前期"
+            },
+            {
+              "name": "精神神経科学",
+              "course_code": "F1524",
+              "instructor": "橋本",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "後期"
+            },
+            {
+              "name": "意味論・語用論",
+              "instructor": "井原",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "学則上は1科目"
+            },
+            {
+              "name": "形態論",
+              "instructor": "高橋",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": ""
+            },
+            {
+              "name": "言語獲得論",
+              "instructor": "木口",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": ""
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1530",
+              "instructor": "矢野",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "脳波計測実習 水3 2年前期に取るべき"
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1531",
+              "instructor": "矢野",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "視線計測・科学方法論 水4 3年推奨"
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1532",
+              "instructor": "鄧",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "第二言語習得 月4"
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1533",
+              "instructor": "矢野",
+              "credits": 2,
+              "recommended_year": 4,
+              "note": "卒論ゼミ 金5前期"
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1534",
+              "instructor": "矢野",
+              "credits": 2,
+              "recommended_year": 4,
+              "note": "卒論ゼミ 金5後期"
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1535",
+              "instructor": "橋本",
+              "credits": 2,
+              "recommended_year": 3,
+              "note": "日本語音韻論 集中 音韻論基礎修了前提"
+            },
+            {
+              "name": "言語科学特殊講義",
+              "course_code": "F1537",
+              "instructor": "平",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "手話言語学 金1後期"
+            },
+            {
+              "name": "心理言語学",
+              "course_code": "F1511",
+              "instructor": "山田",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": "集中"
+            },
+            {
+              "name": "言語科学文献講読",
+              "instructor": "",
+              "credits": 2,
+              "recommended_year": 2,
+              "note": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "other_major",
+      "name": "専門教育科目（その他）",
+      "required_credits": 20,
+      "description": "学科共通・他教室の専門科目から20単位以上（専門74単位のうち言語科学54単位を除いた分）",
+      "subcategories": [
+        {
+          "id": "department_common",
+          "name": "学科共通",
+          "priority": "A",
+          "courses": [
+            {
+              "name": "人間社会学科の研究方法",
+              "course_code": "F1280",
+              "instructor": "",
+              "credits": 2,
+              "recommended_year": 1,
+              "note": "必修"
+            }
+          ]
+        },
+        {
+          "id": "other_departments",
+          "name": "他教室・自由選択専門科目",
+          "priority": "B",
+          "required_credits": 18,
+          "note": "他教室の科目や学部共通科目から自由に選択",
+          "courses": []
+        }
+      ]
+    },
+    {
+      "id": "general",
+      "name": "基礎・教養・基盤科目",
+      "required_credits": 38,
+      "description": "基礎科目群・教養科目群・基盤科目群から38単位",
+      "subcategories": [
+        {
+          "id": "foundation_seminar",
+          "name": "基礎ゼミナール",
+          "priority": "A",
+          "courses": [
+            {
+              "name": "基礎ゼミナール",
+              "course_code": "A0125",
+              "instructor": "",
+              "credits": 2,
+              "recommended_year": 1,
+              "note": "必修"
+            }
+          ]
+        },
+        {
+          "id": "information",
+          "name": "情報科目",
+          "priority": "A",
+          "courses": [
+            {
+              "name": "情報リテラシー実践I",
+              "course_code": "A0731",
+              "instructor": "",
+              "credits": 2,
+              "recommended_year": 1,
+              "note": "必修"
+            }
+          ]
+        },
+        {
+          "id": "language_first",
+          "name": "第一群言語科目",
+          "priority": "B",
+          "required_credits": 8,
+          "note": "1年次6単位 + 2年次2単位",
+          "courses": []
+        },
+        {
+          "id": "language_second",
+          "name": "第二群言語科目",
+          "priority": "B",
+          "required_credits": 12,
+          "note": "第二外国語など",
+          "courses": []
+        },
+        {
+          "id": "liberal_arts",
+          "name": "教養・基盤・キャリア科目",
+          "priority": "B",
+          "required_credits": 14,
+          "note": "教養科目群・基盤科目群・キャリア教育科目から14単位",
+          "courses": [
+            {
+              "name": "ことばの科学",
+              "course_code": "X0032",
+              "instructor": "",
+              "credits": 2,
+              "recommended_year": 1,
+              "note": "全学共通 教養科目 推奨"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "free_elective",
+      "name": "自由選択科目",
+      "required_credits": 18,
+      "description": "卒業に必要な残り18単位（専門・教養の超過分も算入可）",
+      "subcategories": [
+        {
+          "id": "free_elective_courses",
+          "name": "自由選択",
+          "priority": "B",
+          "required_credits": 18,
+          "note": "他学部・他学科・資格科目・超過単位など自由に選択",
+          "courses": []
+        }
+      ]
+    }
+  ],
+  "graduate": {
+    "id": "graduate",
+    "name": "大学院科目（参考）",
+    "description": "人文科学研究科 言語科学分野",
+    "courses": [
+      {
+        "name": "言語科学分野 大学院科目",
+        "course_code_prefix": "O15",
+        "instructor": "",
+        "credits": 2,
+        "recommended_year": 1,
+        "note": "全科目"
+      }
+    ]
+  }
+}
