@@ -1,0 +1,98 @@
+---
+import Layout from '../layouts/Layout.astro';
+import TimetableGrid from '../components/TimetableGrid.astro';
+import IntensiveCourses from '../components/IntensiveCourses.astro';
+
+import coursesData from '../data/courses.json';
+
+const { year, courses } = coursesData;
+
+// 前期: 前期 + 通年
+const firstSemesterCourses = courses.filter(
+  (course) => course.semester === "前期" || course.semester === "通年"
+);
+// 後期: 後期 + 通年
+const secondSemesterCourses = courses.filter(
+  (course) => course.semester === "後期" || course.semester === "通年"
+);
+// 集中講義
+const intensiveCourses = courses.filter(
+  (course) => course.period === 0 || course.day_of_week === "他"
+);
+
+// 通常科目のみ（グリッド用）
+const firstSemesterRegular = firstSemesterCourses.filter(
+  (course) => course.period > 0 && course.day_of_week !== "他"
+);
+const secondSemesterRegular = secondSemesterCourses.filter(
+  (course) => course.period > 0 && course.day_of_week !== "他"
+);
+---
+
+<Layout title={`${year}年度 言語科学教室 時間割`}>
+  <p class="text-sm text-gray-500 mb-2">
+    東京都立大学 人文社会学部 人間社会学科 言語科学教室
+    ・{courses.length}科目
+  </p>
+
+  <!-- セメスター切り替え -->
+  <div class="mb-6 flex border-b border-gray-200">
+    <button
+      id="tab-first-semester"
+      class="semester-tab px-4 py-2 text-sm font-medium border-b-2 border-blue-500 text-blue-600"
+      data-semester="first"
+    >
+      前期（{firstSemesterRegular.length}科目）
+    </button>
+    <button
+      id="tab-second-semester"
+      class="semester-tab px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+      data-semester="second"
+    >
+      後期（{secondSemesterRegular.length}科目）
+    </button>
+  </div>
+
+  <!-- 前期 -->
+  <div id="panel-first-semester" class="semester-panel">
+    <TimetableGrid courses={firstSemesterRegular} />
+  </div>
+
+  <!-- 後期 -->
+  <div id="panel-second-semester" class="semester-panel hidden">
+    <TimetableGrid courses={secondSemesterRegular} />
+  </div>
+
+  <!-- 集中講義（常時表示） -->
+  <IntensiveCourses courses={intensiveCourses} />
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll<HTMLButtonElement>('.semester-tab');
+    const panels = document.querySelectorAll<HTMLElement>('.semester-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const semester = tab.dataset.semester;
+
+        // タブのスタイル切り替え
+        tabs.forEach(otherTab => {
+          otherTab.classList.remove('border-blue-500', 'text-blue-600');
+          otherTab.classList.add('border-transparent', 'text-gray-500');
+        });
+        tab.classList.remove('border-transparent', 'text-gray-500');
+        tab.classList.add('border-blue-500', 'text-blue-600');
+
+        // パネルの表示切り替え
+        panels.forEach(panel => {
+          panel.classList.add('hidden');
+        });
+        const targetPanel = document.getElementById(`panel-${semester}-semester`);
+        if (targetPanel) {
+          targetPanel.classList.remove('hidden');
+        }
+      });
+    });
+  });
+</script>

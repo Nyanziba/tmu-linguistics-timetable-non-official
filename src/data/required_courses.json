@@ -1,0 +1,233 @@
+[
+  {
+    "name": "音韻論基礎",
+    "instructor": "本間",
+    "priority": "A",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "101・102"
+  },
+  {
+    "name": "言語脳科学",
+    "instructor": "橋本",
+    "priority": "A",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "前期・後期"
+  },
+  {
+    "name": "認知神経科学",
+    "instructor": "本多",
+    "priority": "A",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "前期・後期"
+  },
+  {
+    "name": "心理言語学",
+    "instructor": "矢野",
+    "priority": "A",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": ""
+  },
+  {
+    "name": "言語科学卒業論文",
+    "instructor": "",
+    "priority": "A",
+    "recommended_year": 4,
+    "max_recommended_year": 4,
+    "note": "全教員"
+  },
+  {
+    "name": "言語科学概論",
+    "instructor": "江頭",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "前期・後期"
+  },
+  {
+    "name": "言語情報処理の統計学",
+    "instructor": "矢野",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": ""
+  },
+  {
+    "name": "脳計測科学",
+    "instructor": "渕野",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 3,
+    "note": "I・II"
+  },
+  {
+    "name": "形態論",
+    "instructor": "高橋",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": ""
+  },
+  {
+    "name": "音韻論",
+    "instructor": "本間",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": "I・II"
+  },
+  {
+    "name": "統語論基礎",
+    "instructor": "原田",
+    "priority": "A",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": ""
+  },
+  {
+    "name": "統語論",
+    "instructor": "原田",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": ""
+  },
+  {
+    "name": "生成言語理論",
+    "instructor": "原田",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": "101・102"
+  },
+  {
+    "name": "発達科学",
+    "instructor": "パク",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": ""
+  },
+  {
+    "name": "精神神経科学",
+    "instructor": "橋本",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": ""
+  },
+  {
+    "name": "意味論",
+    "instructor": "井原",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 3,
+    "note": "語用論含む"
+  },
+  {
+    "name": "語用論",
+    "instructor": "井原",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 3,
+    "note": "意味論含む"
+  },
+  {
+    "name": "言語獲得論",
+    "instructor": "木口",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": ""
+  },
+  {
+    "name": "言語科学文献講読",
+    "instructor": "",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": ""
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1532",
+    "instructor": "鄧",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "第二言語習得 月4"
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1530",
+    "instructor": "矢野",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "脳波計測実習 水3 2年前期に取るべき"
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1531",
+    "instructor": "矢野",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": "視線計測・科学方法論 水4 3年推奨"
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1537",
+    "instructor": "平",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 4,
+    "note": "手話言語学 金1後期"
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1533",
+    "instructor": "矢野",
+    "priority": "B",
+    "recommended_year": 4,
+    "max_recommended_year": 4,
+    "note": "卒論ゼミ 金5前期"
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1534",
+    "instructor": "矢野",
+    "priority": "B",
+    "recommended_year": 4,
+    "max_recommended_year": 4,
+    "note": "卒論ゼミ 金5後期"
+  },
+  {
+    "name": "言語科学特殊講義",
+    "course_code": "F1535",
+    "instructor": "橋本",
+    "priority": "B",
+    "recommended_year": 3,
+    "max_recommended_year": 3,
+    "note": "日本語音韻論 集中 音韻論基礎修了前提"
+  },
+  {
+    "name": "心理言語学",
+    "instructor": "山田",
+    "priority": "B",
+    "recommended_year": 2,
+    "max_recommended_year": 2,
+    "note": "集中"
+  },
+  {
+    "name": "ことばの科学",
+    "instructor": "",
+    "priority": "C",
+    "recommended_year": 1,
+    "max_recommended_year": 1,
+    "note": "全学共通 教養科目 推奨"
+  }
+]

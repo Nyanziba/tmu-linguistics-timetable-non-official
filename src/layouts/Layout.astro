@@ -1,0 +1,29 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900">{title}</h1>
+      </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6">
+      <slot />
+    </main>
+  </body>
+</html>

@@ -1,0 +1,207 @@
+---
+interface Course {
+  course_name: string;
+  course_code: string;
+  instructor: string;
+  day_of_week: string;
+  period: number;
+  semester: string;
+  credits: number;
+  detail_url: string;
+  priority: string;
+  recommended_year: number;
+  max_recommended_year: number;
+}
+
+interface Props {
+  courses: Course[];
+}
+
+const { courses } = Astro.props;
+
+const daysOfWeek = ["月", "火", "水", "木", "金"];
+const periods = [1, 2, 3, 4, 5, 6];
+
+// グリッドデータを構築: grid[曜日][時限] = Course[]
+const grid: Record<string, Record<number, Course[]>> = {};
+for (const day of daysOfWeek) {
+  grid[day] = {};
+  for (const period of periods) {
+    grid[day][period] = [];
+  }
+}
+
+for (const course of courses) {
+  if (course.period > 0 && daysOfWeek.includes(course.day_of_week)) {
+    grid[course.day_of_week][course.period].push(course);
+  }
+}
+
+// 使われている最大時限を検出（空行を減らすため）
+let maxPeriod = 1;
+for (const day of daysOfWeek) {
+  for (const period of periods) {
+    if (grid[day][period].length > 0 && period > maxPeriod) {
+      maxPeriod = period;
+    }
+  }
+}
+const activePeriods = periods.filter(p => p <= maxPeriod);
+
+function priorityClasses(priority: string): string {
+  switch (priority) {
+    case "A": return "bg-red-50 border-red-300 hover:bg-red-100";
+    case "B": return "bg-blue-50 border-blue-300 hover:bg-blue-100";
+    case "C": return "bg-green-50 border-green-300 hover:bg-green-100";
+    default: return "bg-gray-50 border-gray-200";
+  }
+}
+
+function priorityBadgeClasses(priority: string): string {
+  switch (priority) {
+    case "A": return "bg-red-500 text-white";
+    case "B": return "bg-blue-500 text-white";
+    case "C": return "bg-green-500 text-white";
+    default: return "bg-gray-400 text-white";
+  }
+}
+
+function priorityLabel(priority: string): string {
+  switch (priority) {
+    case "A": return "必修";
+    case "B": return "選択必修";
+    case "C": return "推奨";
+    default: return "";
+  }
+}
+---
+
+<!-- 学年フィルタ -->
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <span class="text-sm font-medium text-gray-700">学年フィルタ:</span>
+  <button data-year="all" class="year-filter-button px-3 py-1 rounded-full text-sm font-medium bg-gray-800 text-white">
+    全て
+  </button>
+  {[1, 2, 3, 4].map(year => (
+    <button data-year={year} class="year-filter-button px-3 py-1 rounded-full text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300">
+      {year}年
+    </button>
+  ))}
+</div>
+
+<!-- 凡例 -->
+<div class="mb-4 flex flex-wrap gap-4 text-sm">
+  <div class="flex items-center gap-1">
+    <span class="inline-block w-3 h-3 rounded bg-red-500"></span>
+    <span>必修 (A)</span>
+  </div>
+  <div class="flex items-center gap-1">
+    <span class="inline-block w-3 h-3 rounded bg-blue-500"></span>
+    <span>選択必修 (B)</span>
+  </div>
+  <div class="flex items-center gap-1">
+    <span class="inline-block w-3 h-3 rounded bg-green-500"></span>
+    <span>推奨 (C)</span>
+  </div>
+</div>
+
+<!-- 時間割グリッド -->
+<div class="overflow-x-auto -mx-4 sm:mx-0">
+  <div class="min-w-[640px] px-4 sm:px-0">
+    <table class="w-full border-collapse border border-gray-300">
+      <thead>
+        <tr>
+          <th class="w-12 border border-gray-300 bg-gray-100 p-2 text-center text-sm font-medium text-gray-600">
+            時限
+          </th>
+          {daysOfWeek.map(day => (
+            <th class="border border-gray-300 bg-gray-100 p-2 text-center text-sm font-medium text-gray-600">
+              {day}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {activePeriods.map(period => (
+          <tr>
+            <td class="border border-gray-300 bg-gray-50 p-2 text-center text-sm font-medium text-gray-600 align-top">
+              {period}
+            </td>
+            {daysOfWeek.map(day => (
+              <td class="border border-gray-300 p-1 align-top min-h-[80px] h-20">
+                {grid[day][period].map(course => (
+                  <a
+                    href={course.detail_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class:list={[
+                      "course-cell block rounded border p-1.5 mb-1 last:mb-0 text-xs transition-colors cursor-pointer no-underline",
+                      priorityClasses(course.priority),
+                    ]}
+                    data-recommended-year={course.recommended_year}
+                    data-max-recommended-year={course.max_recommended_year}
+                    title={`${course.course_name} - ${course.instructor} (${course.credits}単位)`}
+                  >
+                    <div class="flex items-start justify-between gap-1">
+                      <span class="font-medium text-gray-900 leading-tight line-clamp-2">
+                        {course.course_name}
+                      </span>
+                      <span class:list={[
+                        "shrink-0 text-[10px] px-1 py-0.5 rounded font-medium",
+                        priorityBadgeClasses(course.priority),
+                      ]}>
+                        {priorityLabel(course.priority)}
+                      </span>
+                    </div>
+                    <div class="text-gray-500 mt-0.5">{course.instructor}</div>
+                  </a>
+                ))}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll<HTMLButtonElement>('.year-filter-button');
+    const courseCells = document.querySelectorAll<HTMLElement>('.course-cell');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const selectedYear = button.dataset.year;
+
+        // ボタンのスタイル更新
+        filterButtons.forEach(otherButton => {
+          otherButton.classList.remove('bg-gray-800', 'text-white');
+          otherButton.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        button.classList.remove('bg-gray-200', 'text-gray-700');
+        button.classList.add('bg-gray-800', 'text-white');
+
+        // 科目セルのフィルタリング
+        courseCells.forEach(cell => {
+          if (selectedYear === 'all') {
+            cell.style.display = '';
+            cell.style.opacity = '1';
+            return;
+          }
+          const yearNumber = parseInt(selectedYear ?? '0', 10);
+          const minYear = parseInt(cell.dataset.recommendedYear ?? '0', 10);
+          const maxYear = parseInt(cell.dataset.maxRecommendedYear ?? '0', 10) || minYear;
+
+          // 選択した学年が推奨年次の範囲内なら表示
+          if (yearNumber >= minYear && yearNumber <= maxYear) {
+            cell.style.display = '';
+            cell.style.opacity = '1';
+          } else {
+            cell.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
